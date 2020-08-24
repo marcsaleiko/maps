@@ -1,0 +1,21 @@
+{
+  "name": "@marcsaleiko/maps",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcsaleiko/maps.git"
+  },
+  "author": "Marc Saleiko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marcsaleiko/maps/issues"
+  },
+  "homepage": "https://github.com/marcsaleiko/maps#readme",
+  "dependencies": {
+    "leaflet": "^1.6.0"
+  }
+}
