@@ -85,8 +85,23 @@ window.LeafletMapProvider = (function () {
         });
       }
     }
+    if( mapSettings.mapUseFirstMarkerAsCenter === true ) {
+      map.panTo(new L.LatLng(marker[0].latitude, marker[0].longitude), mapSettings.mapDefaultZoom);
+    }
     if( mapSettings.markerFitBounds === true ) {
       map.fitBounds(L.latLngBounds(latLngBounds));
+    }
+  };
+
+  app.showMarker = function(markerIndex, markerId) {
+      if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
+        mapMarker[markerIndex]._icon.style.display = "block";
+      }
+  };
+
+  app.hideMarker = function(markerIndex, markerId) {
+    if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
+      mapMarker[markerIndex]._icon.style.display = "none";
     }
   };
 

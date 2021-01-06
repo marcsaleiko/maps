@@ -4,10 +4,12 @@ window.Maps = ( function(){
   app.marker = [];
   var mapContainer = false;
   var mapVisible = false;
+  var active = false;
   var settings = {
     mapContainerSelector: '.js-map',
     mapDefaultZoom: 13,
     mapDefaultCenter: [60.394517, 5.3429066],
+    mapUseFirstMarkerAsCenter: false,
     markerWindowVariableName: 'MapsMarkerData',
     markerImagePath: '/typo3conf/ext/t3xp_sitepackage/Resources/Public/1_General/Assets/Images/marker-default.png',
     markerIconSize: [32, 32],
@@ -25,8 +27,9 @@ window.Maps = ( function(){
   };
 
   app.init = function( options ) {
-    if(_init){return;}
+    if(_init && active){return;}
     _init = true;
+
     // extend settings by options
     settings = Object.assign(settings, options);
 
@@ -45,6 +48,7 @@ window.Maps = ( function(){
 
       app.marker = window[settings.markerWindowVariableName];
       if( app.marker.length > 0 ) {
+        active = true;
         settings.provider.init( settings.providerConfiguration );
         if( settings.lazyLoadMap === false ) {
           // automatically trigger further initialization
@@ -54,6 +58,9 @@ window.Maps = ( function(){
           if( !settings.provider.hasRemoteLibraryToLoad() ) {
             app.remoteLibrariesHaveLoaded();
           }
+          settings.provider.initMap( mapContainer[0], settings );
+          settings.provider.setMarker( app.marker, settings );
+          mapVisible = true;
         }
       }
       else if( settings.hideMapIfNoMarkerAvailable ){
@@ -70,7 +77,43 @@ window.Maps = ( function(){
 
   app.isMapVisible = function() {
     return mapVisible;
-  }
+  };
+
+  app.isActive = function() {
+    return active;
+  };
+
+  app.showMap = function() {
+    if( active && !mapVisible ) {
+      settings.provider.initMap( mapContainer[0], settings );
+      settings.provider.setMarker( app.marker, settings );
+      mapVisible = true;
+    }
+  };
+
+  /**
+   * Provide a source of visible Ids and hide all other map markers
+   * accordingly
+   * @param  {array} visibleIds set of Ids that should stay visible
+   */
+  app.updateMarkerVisibility = function( visibleIds )
+  {
+    if( active && mapVisible ) {
+      // check whether a marker id (.content) is in the set of
+      // visibleUIds and set them to visible
+      for( var i = 0; i < app.marker.length; i++ )
+      {
+        if( visibleIds.indexOf( app.marker[i].id ) >= 0 ) {
+          // should be visible
+          settings.provider.showMarker(i, app.marker[i].id);
+        }
+        else {
+          // should be hidden
+          settings.provider.hideMarker(i, app.marker[i].id);
+        }
+      }
+    }
+  };
 
   var $$ = function( selector ) {
     return document.querySelectorAll( selector );
