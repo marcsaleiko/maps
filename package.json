@@ -1,7 +1,7 @@
 {
   "name": "@marcsaleiko/maps",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.1.0",
+  "description": "Map library that sets markers for Leaflet and Google Maps",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
