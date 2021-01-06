@@ -101,6 +101,14 @@ window.GoogleMapsMapProvider = (function () {
       }
   
     };
+
+    app.showMarker = function(markerIndex, markerId) {
+      // @todo Add show marker functionality
+    };
+
+    app.hideMarker = function(markerIndex, markerId) {
+      // @todo Add hide marker functionality
+    };
   
     var loadMapsRemoteLibrary = function() {
       var script = document.createElement('script');
