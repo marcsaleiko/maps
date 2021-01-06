@@ -36,6 +36,9 @@ window.Maps = ( function(){
     mapContainer = $$( settings.mapContainerSelector );
     if( mapContainer.length > 0 ) {
 
+      // allow override of data- attributes
+      settings = Object.assign(settings, getDataAttributes(mapContainer[0]));
+
       if( typeof window[settings.markerWindowVariableName] === 'undefined' ) {
         console.error('Maps: window.'+settings.markerWindowVariableName+' does not exist. No marker data found. Exiting.')
         return;
@@ -139,6 +142,25 @@ window.Maps = ( function(){
         elements[i].classList.remove( className );
       }
     }
+  };
+
+  var getDataAttributes = function(el) {
+    var data = {};
+    [].forEach.call(el.attributes, function(attr) {
+      if (/^data-/.test(attr.name)) {
+        var camelCaseName = attr.name.substr(5).replace(/-(.)/g, function ($0, $1) {
+          return $1.toUpperCase();
+        });
+        if( attr.value === 'false' ) {
+          data[camelCaseName] = false;
+        } else if( attr.value === 'true' ) {
+          data[camelCaseName] = true;
+        } else {
+          data[camelCaseName] = attr.value;
+        }
+      }
+    });
+    return data;
   };
 
   return app;
