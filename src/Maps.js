@@ -61,9 +61,6 @@ window.Maps = ( function(){
           if( !settings.provider.hasRemoteLibraryToLoad() ) {
             app.remoteLibrariesHaveLoaded();
           }
-          settings.provider.initMap( mapContainer[0], settings );
-          settings.provider.setMarker( app.marker, settings );
-          mapVisible = true;
         }
       }
       else if( settings.hideMapIfNoMarkerAvailable ){
