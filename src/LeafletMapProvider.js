@@ -14,6 +14,7 @@ window.LeafletMapProvider = (function () {
     },
     markerPopupAnchor: [0, -40],
     zoomControl: true,
+    scrollWheelZoom: true,
   };
 
   app.init = function( options ) {
@@ -28,7 +29,8 @@ window.LeafletMapProvider = (function () {
 
   app.initMap = function( mapElement, mapSettings ) {
     map = L.map(mapElement, {
-      zoomControl: settings.zoomControl
+      zoomControl: settings.zoomControl,
+      scrollWheelZoom: settings.scrollWheelZoom,
     }).setView(mapSettings.mapDefaultCenter, mapSettings.mapDefaultZoom);
 
     if( settings.tileLayerType === 'normal' ) {
