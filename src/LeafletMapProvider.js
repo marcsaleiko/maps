@@ -13,6 +13,7 @@ window.LeafletMapProvider = (function () {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     },
     markerPopupAnchor: [0, -40],
+    zoomControl: true,
   };
 
   app.init = function( options ) {
@@ -26,7 +27,9 @@ window.LeafletMapProvider = (function () {
   };
 
   app.initMap = function( mapElement, mapSettings ) {
-    map = L.map(mapElement).setView(mapSettings.mapDefaultCenter, mapSettings.mapDefaultZoom);
+    map = L.map(mapElement, {
+      zoomControl: settings.zoomControl
+    }).setView(mapSettings.mapDefaultCenter, mapSettings.mapDefaultZoom);
 
     if( settings.tileLayerType === 'normal' ) {
       tileLayer = L.tileLayer(settings.tileLayerUrl, settings.tileLayerOptions ).addTo(map);
