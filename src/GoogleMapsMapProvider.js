@@ -101,6 +101,9 @@ window.GoogleMapsMapProvider = (function () {
       }
     }
 
+    if( mapSettings.mapUseFirstMarkerAsCenter === true ) {
+      map.panTo(new google.maps.LatLng( marker[0].latitude, marker[0].longitude ));
+    }
     if( mapSettings.markerFitBounds === true ) {
       map.fitBounds( bounds );
     }
