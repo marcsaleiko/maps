@@ -14,7 +14,7 @@ window.LeafletMapProvider = (function () {
     },
     markerPopupAnchor: [0, -40],
     zoomControl: true,
-    scrollWheelZoom: true,
+    scrollWheelZoom: true, 
   };
 
   app.init = function( options ) {
