@@ -31,6 +31,7 @@ window.LeafletMapProvider = (function () {
     map = L.map(mapElement, {
       zoomControl: settings.zoomControl,
       scrollWheelZoom: settings.scrollWheelZoom,
+      dragging: !L.Browser.mobile,
     }).setView(mapSettings.mapDefaultCenter, mapSettings.mapDefaultZoom);
 
     if( settings.tileLayerType === 'normal' ) {
