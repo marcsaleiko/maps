@@ -56,6 +56,7 @@ window.Maps = ( function(){
      * array that can be used to init a polyline in the provider as return value
      */
     beforePolylineRenderFilter: false,
+    afterShowCallback: false,
   };
 
   app.init = function( options ) {
@@ -110,6 +111,9 @@ window.Maps = ( function(){
     app.mapLocations = settings.provider.setPolylines( app.mapLocations, settings );
     
     mapVisible = true;
+    if( typeof settings.afterShowCallback === 'function' ) {
+      settings.afterShowCallback()
+    }
   };
 
   app.isMapVisible = function() {
@@ -129,6 +133,9 @@ window.Maps = ( function(){
       console.log(app.mapLocations)
 
       mapVisible = true;
+      if( typeof settings.afterShowCallback === 'function' ) {
+        settings.afterShowCallback()
+      }
     }
   };
 
