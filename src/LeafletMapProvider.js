@@ -58,8 +58,18 @@ window.LeafletMapProvider = (function () {
     var latLngBounds = [];
     for( var i = 0; i < mapLocations.length; i++ ) {
 
+      var icon = defaultIcon
+      if( mapLocations[i].iconUrl !== '' ) {
+        icon = L.icon({
+          iconUrl: mapLocations[i].iconUrl,
+          iconSize: mapSettings.markerIconSize,
+          iconAnchor: mapSettings.markerIconAnchor,
+          popupAnchor: settings.markerPopupAnchor,
+        })
+      }
+
       mapMarker[i] = L.marker( [mapLocations[i].latitude, mapLocations[i].longitude], {
-          icon: defaultIcon,
+          icon: icon,
       }).addTo(map);
 
       latLngBounds.push([mapLocations[i].latitude, mapLocations[i].longitude]);
@@ -102,29 +112,35 @@ window.LeafletMapProvider = (function () {
   };
 
   app.setPolylines = function( mapLocations, mapSettings ) {
-    console.log(mapLocations);
 
-    var hasBeforePolylineRenderFilter = typeof mapSettings.beforePolylineRenderFilter === 'function';
+    var hasBeforePolylineRenderFilter = typeof mapSettings.beforePolylineRenderFilter === 'function'
 
     for( var i = 0; i < mapLocations.length; i++ ) {
       if( mapLocations[i].polyline.length > 1 ) {
-        var polylineData = mapLocations[i].polyline;
+        var polylineData = mapLocations[i].polyline
         if( hasBeforePolylineRenderFilter ) {
-          polylineData = mapSettings.beforePolylineRenderFilter( polylineData );
+          polylineData = mapSettings.beforePolylineRenderFilter( polylineData )
         }
+
+        if( mapSettings.drawSupportPolyline ) {
+          var supportPolyline = new L.Polyline( polylineData, {
+            weight: mapSettings.supportPolylineWeight,
+            color: mapSettings.supportPolylineColor
+          })
+          supportPolyline.addTo(map)
+          mapLocations[i].references.supportPolyline = supportPolyline
+        } 
 
         var polyline = new L.Polyline( polylineData, {
           weight: mapSettings.polylineWeight,
           color: (mapLocations[i].polylineColor !== '' ? mapLocations[i].polylineColor : mapSettings.polylineColor)
-        });
-        polyline.addTo(map);
-        mapLocations[i].references.polyline = polyline;
+        })
+        polyline.addTo(map)
+        mapLocations[i].references.polyline = polyline
       }
     }
 
-    console.log(mapLocations);
-
-    return mapLocations;
+    return mapLocations
   };
 
   app.showMarker = function(markerIndex, markerId) {

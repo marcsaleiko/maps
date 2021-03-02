@@ -2,6 +2,7 @@ function MapLocation(arg) {
   this.id = arg.id || '';
   this.latitude = arg.latitude || 0.0;
   this.longitude = arg.longitude || 0.0;
+  this.iconUrl = arg.iconUrl || '';
   this.infowindow = arg.infowindow || 0.0;
   this.polyline = arg.polyline || [];
   this.polylineColor = arg.polylineColor || '';
@@ -47,6 +48,9 @@ window.Maps = ( function(){
     beforeMapLocationFilter: false,
     polylineWeight: 8,
     polylineColor: '#ff8030',
+    drawSupportPolyline: true,
+    supportPolylineWeight: 12,
+    supportPolylineColor: '#ffffff',
     /**
      * Callback filter that has "polyline" as argument and expects a transformed
      * array that can be used to init a polyline in the provider as return value
@@ -122,6 +126,8 @@ window.Maps = ( function(){
       app.mapLocations = settings.provider.setMarker( app.mapLocations, settings );
       app.mapLocations = settings.provider.setPolylines( app.mapLocations, settings );
 
+      console.log(app.mapLocations)
+
       mapVisible = true;
     }
   };
@@ -149,6 +155,7 @@ window.Maps = ( function(){
       }
     }
   };
+
 
   var $$ = function( selector ) {
     return document.querySelectorAll( selector );
