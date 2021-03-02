@@ -135,8 +135,34 @@ window.LeafletMapProvider = (function () {
           weight: mapSettings.polylineWeight,
           color: (mapLocations[i].polylineColor !== '' ? mapLocations[i].polylineColor : mapSettings.polylineColor)
         })
+        polyline.markerData = mapLocations[i];
         polyline.addTo(map)
         mapLocations[i].references.polyline = polyline
+
+        if(mapSettings.polylineHasOnLick) {
+          mapLocations[i].references.polyline.on('click', function(e){
+            if( mapSettings.zoomToPolylineOnClick ) {
+              map.fitBounds(this.getBounds())
+            }
+            if( typeof mapSettings.polylineOnClickCallback === 'function' ) {
+              mapSettings.polylineOnClickCallback( this );
+            }
+            if( mapSettings.showInfoWindow ) {
+              var infoWindowBody = '';
+              console.log(this.markerData)
+              if( typeof this.markerData.infowindow !== 'undefined' && this.markerData.infowindow !== '' ) {
+                infoWindowBody = this.markerData.infowindow;
+              }
+              if( typeof mapSettings.markerInfoWindowBodyFilter === 'function' ) {
+                infoWindowBody = mapSettings.markerInfoWindowBodyFilter( this, infoWindowBody );
+              }
+              if( infoWindowBody !== '' ) {
+                this.bindPopup(infoWindowBody);
+                this.openPopup();
+              }
+            }
+          })
+        }
       }
     }
 
