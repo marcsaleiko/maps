@@ -1,7 +1,21 @@
+function MapLocation(arg) {
+  this.id = arg.id || '';
+  this.latitude = arg.latitude || 0.0;
+  this.longitude = arg.longitude || 0.0;
+  this.infowindow = arg.infowindow || 0.0;
+  this.polyline = arg.polyline || [];
+  this.references = {
+    marker: null,
+    polyline: null,
+    supportPolyline: null
+  };
+};
+
 window.Maps = ( function(){
   var _init = false;
   var app = {};
   app.marker = [];
+  app.mapLocations = [];
   var mapContainer = false;
   var mapVisible = false;
   var active = false;
@@ -13,7 +27,7 @@ window.Maps = ( function(){
     markerWindowVariableName: 'MapsMarkerData',
     markerImagePath: '/typo3conf/ext/t3xp_sitepackage/Resources/Public/1_General/Assets/Images/marker-default.png',
     markerIconSize: [32, 32],
-    markerIconAnchor: [16, 32],
+    markerIconAnchor: [16, 32], 
     markerFitBounds: true,
     provider: false,
     providerConfiguration: {},
@@ -24,6 +38,13 @@ window.Maps = ( function(){
     hideMapClass: 'd-none',
     markerInfoWindowBodyFilter: false,
     markerOnClickCallback: false,
+    polylineWeight: 8,
+    polylineColor: '#ff8030',
+    /**
+     * Callback filter that has "polyline" as argument and expects a transformed
+     * array that can be used to init a polyline in the provider as return value
+     */
+    beforePolylineRenderFilter: false,
   };
 
   app.init = function( options ) {
@@ -51,6 +72,9 @@ window.Maps = ( function(){
 
       app.marker = window[settings.markerWindowVariableName];
       if( app.marker.length > 0 ) {
+
+        app.mapLocations = getMapLocations(app.marker);
+
         active = true;
         settings.provider.init( settings.providerConfiguration );
         if( settings.lazyLoadMap === false ) {
@@ -71,7 +95,9 @@ window.Maps = ( function(){
 
   app.remoteLibrariesHaveLoaded = function(){
     settings.provider.initMap( mapContainer[0], settings );
-    settings.provider.setMarker( app.marker, settings );
+    app.mapLocations = settings.provider.setMarker( app.mapLocations, settings );
+    app.mapLocations = settings.provider.setPolylines( app.mapLocations, settings );
+    
     mapVisible = true;
   };
 
@@ -86,7 +112,9 @@ window.Maps = ( function(){
   app.showMap = function() {
     if( active && !mapVisible ) {
       settings.provider.initMap( mapContainer[0], settings );
-      settings.provider.setMarker( app.marker, settings );
+      app.mapLocations = settings.provider.setMarker( app.mapLocations, settings );
+      app.mapLocations = settings.provider.setPolylines( app.mapLocations, settings );
+
       mapVisible = true;
     }
   };
@@ -158,6 +186,14 @@ window.Maps = ( function(){
       }
     });
     return data;
+  };
+
+  var getMapLocations = function( marker ) {
+    var mapLocations = [];
+    marker.forEach(function(item){
+      mapLocations.push( new MapLocation(item) );
+    });
+    return mapLocations;
   };
 
   return app;

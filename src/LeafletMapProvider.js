@@ -46,7 +46,7 @@ window.LeafletMapProvider = (function () {
 
   };
 
-  app.setMarker = function( marker, mapSettings ) {
+  app.setMarker = function( mapLocations, mapSettings ) {
 
     var defaultIcon = L.icon({
       iconUrl: mapSettings.markerImagePath,
@@ -56,17 +56,17 @@ window.LeafletMapProvider = (function () {
     });
 
     var latLngBounds = [];
-    for( var i = 0; i < marker.length; i++ ) {
+    for( var i = 0; i < mapLocations.length; i++ ) {
 
-      mapMarker[i] = L.marker( [marker[i].latitude, marker[i].longitude], {
+      mapMarker[i] = L.marker( [mapLocations[i].latitude, mapLocations[i].longitude], {
           icon: defaultIcon,
       }).addTo(map);
 
-      latLngBounds.push([marker[i].latitude, marker[i].longitude]);
-      mapMarker[i].markerData = marker[i];
+      latLngBounds.push([mapLocations[i].latitude, mapLocations[i].longitude]);
+      mapMarker[i].markerData = mapLocations[i];
 
-      if( mapSettings.showInfoWindow && typeof marker[i].infowindow !== 'undefined' && marker[i].infowindow !== '' ) {
-        mapMarker[i].bindPopup(marker[i].infowindow);
+      if( mapSettings.showInfoWindow && typeof mapLocations[i].infowindow !== 'undefined' && mapLocations[i].infowindow !== '' ) {
+        mapMarker[i].bindPopup(mapLocations[i].infowindow);
       }
       if( mapSettings.markerHasOnClick || mapSettings.showInfoWindow ) {
         mapMarker[i].on('click', function() {
@@ -90,13 +90,40 @@ window.LeafletMapProvider = (function () {
           }
         });
       }
+      mapLocations[i].references.marker = mapMarker[i];
     }
     if( mapSettings.mapUseFirstMarkerAsCenter === true ) {
-      map.panTo(new L.LatLng(marker[0].latitude, marker[0].longitude), mapSettings.mapDefaultZoom);
+      map.panTo(new L.LatLng(mapLocations[0].latitude, mapLocations[0].longitude), mapSettings.mapDefaultZoom);
     }
     if( mapSettings.markerFitBounds === true ) {
       map.fitBounds(L.latLngBounds(latLngBounds));
     }
+    return mapLocations;
+  };
+
+  app.setPolylines = function( mapLocations, mapSettings ) {
+    console.log(mapLocations);
+
+    var hasBeforePolylineRenderFilter = typeof mapSettings.beforePolylineRenderFilter === 'function';
+
+    for( var i = 0; i < mapLocations.length; i++ ) {
+      if( mapLocations[i].polyline.length > 1 ) {
+        var polylineData = mapLocations[i].polyline;
+        if( hasBeforePolylineRenderFilter ) {
+          polylineData = mapSettings.beforePolylineRenderFilter( polylineData );
+        }
+        var polyline = new L.Polyline( polylineData, {
+          weight: mapSettings.polylineWeight,
+          color: mapSettings.polylineColor
+        });
+        polyline.addTo(map);
+        mapLocations[i].references.polyline = polyline;
+      }
+    }
+
+    console.log(mapLocations);
+
+    return mapLocations;
   };
 
   app.showMarker = function(markerIndex, markerId) {
