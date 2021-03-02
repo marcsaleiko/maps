@@ -4,6 +4,8 @@ function MapLocation(arg) {
   this.longitude = arg.longitude || 0.0;
   this.infowindow = arg.infowindow || 0.0;
   this.polyline = arg.polyline || [];
+  this.polylineColor = arg.polylineColor || '';
+  this.supportPolylineColor = arg.supportPolylineColor || '';
   this.references = {
     marker: null,
     polyline: null,
@@ -38,6 +40,11 @@ window.Maps = ( function(){
     hideMapClass: 'd-none',
     markerInfoWindowBodyFilter: false,
     markerOnClickCallback: false,
+    /**
+     * Callback filter that takes "mapLocation" and "data" as argument and expects to return
+     * the transformed mapLocation object
+     */
+    beforeMapLocationFilter: false,
     polylineWeight: 8,
     polylineColor: '#ff8030',
     /**
@@ -190,8 +197,13 @@ window.Maps = ( function(){
 
   var getMapLocations = function( marker ) {
     var mapLocations = [];
+    var hasBeforeMapLocationFilter = typeof settings.beforeMapLocationFilter === 'function';
     marker.forEach(function(item){
-      mapLocations.push( new MapLocation(item) );
+      var thisMapLocation = new MapLocation(item);
+      if( hasBeforeMapLocationFilter ) {
+        thisMapLocation = settings.beforeMapLocationFilter( thisMapLocation, item);
+      }
+      mapLocations.push( thisMapLocation );
     });
     return mapLocations;
   };

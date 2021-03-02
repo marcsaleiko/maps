@@ -112,9 +112,10 @@ window.LeafletMapProvider = (function () {
         if( hasBeforePolylineRenderFilter ) {
           polylineData = mapSettings.beforePolylineRenderFilter( polylineData );
         }
+
         var polyline = new L.Polyline( polylineData, {
           weight: mapSettings.polylineWeight,
-          color: mapSettings.polylineColor
+          color: (mapLocations[i].polylineColor !== '' ? mapLocations[i].polylineColor : mapSettings.polylineColor)
         });
         polyline.addTo(map);
         mapLocations[i].references.polyline = polyline;
