@@ -6,11 +6,15 @@ function MapLocation(arg) {
   this.infowindow = arg.infowindow || 0.0;
   this.polyline = arg.polyline || [];
   this.polylineColor = arg.polylineColor || '';
+  this.polylineHoverColor = arg.polylineHoverColor || '';
   this.supportPolylineColor = arg.supportPolylineColor || '';
   this.references = {
     marker: null,
     polyline: null,
     supportPolyline: null
+  };
+  this.flags = {
+    applyDefaultPolylineColorOnHoverOut: true,
   };
 };
 
@@ -57,6 +61,7 @@ window.Maps = ( function(){
      */
     beforePolylineRenderFilter: false,
     polylineHasOnLick: false,
+    polylineHasOnMouseover: false,
     zoomToPolylineOnClick: false,
     polylineOnClickCallback: false,
     afterShowCallback: false,

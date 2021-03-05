@@ -147,7 +147,10 @@ window.LeafletMapProvider = (function () {
               map.fitBounds(this.getBounds())
             }
             if( typeof mapSettings.polylineOnClickCallback === 'function' ) {
-              mapSettings.polylineOnClickCallback( this );
+              var onPolylineCLickReturn = mapSettings.polylineOnClickCallback( this.markerData );
+              if(typeof onPolylineCLickReturn === 'MapLocation') {
+                mapLocations[i] = onPolylineCLickReturn
+              }
             }
             if( mapSettings.showInfoWindow ) {
               var infoWindowBody = '';
@@ -163,6 +166,24 @@ window.LeafletMapProvider = (function () {
               }
             }
           })
+        }
+
+        if(mapSettings.polylineHasOnMouseover) {
+          mapLocations[i].references.polyline.on('mouseover', function(e){
+            if( typeof this.markerData.polylineHoverColor !== 'undefined' && this.markerData.polylineHoverColor !== '') {
+              this.setStyle({
+                color: this.markerData.polylineHoverColor
+              })
+            }
+          })
+  
+          mapLocations[i].references.polyline.on('mouseout', function(e){
+            if(this.markerData.flags.applyDefaultPolylineColorOnHoverOut) {
+              this.setStyle({
+                color: (this.markerData.polylineColor !== '' ? this.markerData.polylineColor : mapSettings.polylineColor)
+              })
+            }
+          })  
         }
 
         // @todo polylines fit bounds
