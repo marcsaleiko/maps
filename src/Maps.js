@@ -109,6 +109,8 @@ window.Maps = ( function(){
   };
 
   app.remoteLibrariesHaveLoaded = function(){
+    // @todo make map init function calls DRY
+    // @see showMap()
     settings.provider.initMap( mapContainer[0], settings );
     app.mapLocations = settings.provider.setMarker( app.mapLocations, settings );
     app.mapLocations = settings.provider.setPolylines( app.mapLocations, settings );
