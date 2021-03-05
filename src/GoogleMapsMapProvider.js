@@ -49,7 +49,7 @@ window.GoogleMapsMapProvider = (function () {
 
   };
 
-  app.setMarker = function( marker, mapSettings ) {
+  app.setMarker = function( mapLocations, mapSettings ) {
 
     var defaultMarkerImage = new google.maps.MarkerImage(
       mapSettings.markerImagePath,
@@ -59,16 +59,16 @@ window.GoogleMapsMapProvider = (function () {
     );
 
     var bounds = new google.maps.LatLngBounds();
-    for (var i = 0; i < marker.length; i++)
+    for (var i = 0; i < mapLocations.length; i++)
     {
-      var myLatLng = new google.maps.LatLng( marker[i].latitude, marker[i].longitude );
+      var myLatLng = new google.maps.LatLng( mapLocations[i].latitude, mapLocations[i].longitude );
       mapMarker[i] = new google.maps.Marker({
         position: myLatLng,
         map: map,
         icon: defaultMarkerImage,
         animation: google.maps.Animation.DROP,
         // like markerData in leaflet map provider
-        content: marker[i]
+        content: mapLocations[i]
         // html: marker[i].infowindow
       });
       bounds.extend( myLatLng );
@@ -99,16 +99,21 @@ window.GoogleMapsMapProvider = (function () {
           }
         });
       }
+      mapLocations[i].references.marker = mapMarker[i];
     }
 
     if( mapSettings.mapUseFirstMarkerAsCenter === true ) {
-      map.panTo(new google.maps.LatLng( marker[0].latitude, marker[0].longitude ));
+      map.panTo(new google.maps.LatLng( mapLocations[0].latitude, mapLocations[0].longitude ));
     }
     if( mapSettings.markerFitBounds === true ) {
       map.fitBounds( bounds );
     }
 
   };
+
+  app.setPolylines = function( mapLocations, mapSettings ) {
+    console.warn('GoogleMapsMapProvider.setPolylines not implemented yet.')
+  }
 
   app.showMarker = function(markerIndex, markerId) {
     // @todo Add show marker functionality
