@@ -46,7 +46,7 @@ window.LeafletMapProvider = (function () {
 
   };
 
-  app.setMarker = function( marker, mapSettings ) {
+  app.setMarker = function( mapLocations, mapSettings ) {
 
     var defaultIcon = L.icon({
       iconUrl: mapSettings.markerImagePath,
@@ -56,17 +56,27 @@ window.LeafletMapProvider = (function () {
     });
 
     var latLngBounds = [];
-    for( var i = 0; i < marker.length; i++ ) {
+    for( var i = 0; i < mapLocations.length; i++ ) {
 
-      mapMarker[i] = L.marker( [marker[i].latitude, marker[i].longitude], {
-          icon: defaultIcon,
+      var icon = defaultIcon
+      if( mapLocations[i].iconUrl !== '' ) {
+        icon = L.icon({
+          iconUrl: mapLocations[i].iconUrl,
+          iconSize: mapSettings.markerIconSize,
+          iconAnchor: mapSettings.markerIconAnchor,
+          popupAnchor: settings.markerPopupAnchor,
+        })
+      }
+
+      mapMarker[i] = L.marker( [mapLocations[i].latitude, mapLocations[i].longitude], {
+          icon: icon,
       }).addTo(map);
 
-      latLngBounds.push([marker[i].latitude, marker[i].longitude]);
-      mapMarker[i].markerData = marker[i];
+      latLngBounds.push([mapLocations[i].latitude, mapLocations[i].longitude]);
+      mapMarker[i].markerData = mapLocations[i];
 
-      if( mapSettings.showInfoWindow && typeof marker[i].infowindow !== 'undefined' && marker[i].infowindow !== '' ) {
-        mapMarker[i].bindPopup(marker[i].infowindow);
+      if( mapSettings.showInfoWindow && typeof mapLocations[i].infowindow !== 'undefined' && mapLocations[i].infowindow !== '' ) {
+        mapMarker[i].bindPopup(mapLocations[i].infowindow);
       }
       if( mapSettings.markerHasOnClick || mapSettings.showInfoWindow ) {
         mapMarker[i].on('click', function() {
@@ -90,13 +100,76 @@ window.LeafletMapProvider = (function () {
           }
         });
       }
+      mapLocations[i].references.marker = mapMarker[i];
     }
     if( mapSettings.mapUseFirstMarkerAsCenter === true ) {
-      map.panTo(new L.LatLng(marker[0].latitude, marker[0].longitude), mapSettings.mapDefaultZoom);
+      map.panTo(new L.LatLng(mapLocations[0].latitude, mapLocations[0].longitude), mapSettings.mapDefaultZoom);
     }
     if( mapSettings.markerFitBounds === true ) {
       map.fitBounds(L.latLngBounds(latLngBounds));
     }
+    return mapLocations;
+  };
+
+  app.setPolylines = function( mapLocations, mapSettings ) {
+
+    var hasBeforePolylineRenderFilter = typeof mapSettings.beforePolylineRenderFilter === 'function'
+
+    for( var i = 0; i < mapLocations.length; i++ ) {
+      if( mapLocations[i].polyline.length > 1 ) {
+        var polylineData = mapLocations[i].polyline
+        if( hasBeforePolylineRenderFilter ) {
+          polylineData = mapSettings.beforePolylineRenderFilter( polylineData )
+        }
+
+        if( mapSettings.drawSupportPolyline ) {
+          var supportPolyline = new L.Polyline( polylineData, {
+            weight: mapSettings.supportPolylineWeight,
+            color: mapSettings.supportPolylineColor
+          })
+          supportPolyline.addTo(map)
+          mapLocations[i].references.supportPolyline = supportPolyline
+        } 
+
+        var polyline = new L.Polyline( polylineData, {
+          weight: mapSettings.polylineWeight,
+          color: (mapLocations[i].polylineColor !== '' ? mapLocations[i].polylineColor : mapSettings.polylineColor)
+        })
+        polyline.markerData = mapLocations[i];
+        polyline.addTo(map)
+        mapLocations[i].references.polyline = polyline
+
+        // @todo make onclick DRY
+        // @see setMarker()
+        if(mapSettings.polylineHasOnLick) {
+          mapLocations[i].references.polyline.on('click', function(e){
+            if( mapSettings.zoomToPolylineOnClick ) {
+              map.fitBounds(this.getBounds())
+            }
+            if( typeof mapSettings.polylineOnClickCallback === 'function' ) {
+              mapSettings.polylineOnClickCallback( this );
+            }
+            if( mapSettings.showInfoWindow ) {
+              var infoWindowBody = '';
+              if( typeof this.markerData.infowindow !== 'undefined' && this.markerData.infowindow !== '' ) {
+                infoWindowBody = this.markerData.infowindow;
+              }
+              if( typeof mapSettings.markerInfoWindowBodyFilter === 'function' ) {
+                infoWindowBody = mapSettings.markerInfoWindowBodyFilter( this, infoWindowBody );
+              }
+              if( infoWindowBody !== '' ) {
+                this.bindPopup(infoWindowBody);
+                this.openPopup();
+              }
+            }
+          })
+        }
+
+        // @todo polylines fit bounds
+      }
+    }
+
+    return mapLocations
   };
 
   app.showMarker = function(markerIndex, markerId) {

@@ -1,7 +1,24 @@
+function MapLocation(arg) {
+  this.id = arg.id || '';
+  this.latitude = arg.latitude || 0.0;
+  this.longitude = arg.longitude || 0.0;
+  this.iconUrl = arg.iconUrl || '';
+  this.infowindow = arg.infowindow || 0.0;
+  this.polyline = arg.polyline || [];
+  this.polylineColor = arg.polylineColor || '';
+  this.supportPolylineColor = arg.supportPolylineColor || '';
+  this.references = {
+    marker: null,
+    polyline: null,
+    supportPolyline: null
+  };
+};
+
 window.Maps = ( function(){
   var _init = false;
   var app = {};
   app.marker = [];
+  app.mapLocations = [];
   var mapContainer = false;
   var mapVisible = false;
   var active = false;
@@ -13,7 +30,7 @@ window.Maps = ( function(){
     markerWindowVariableName: 'MapsMarkerData',
     markerImagePath: '/typo3conf/ext/t3xp_sitepackage/Resources/Public/1_General/Assets/Images/marker-default.png',
     markerIconSize: [32, 32],
-    markerIconAnchor: [16, 32],
+    markerIconAnchor: [16, 32], 
     markerFitBounds: true,
     provider: false,
     providerConfiguration: {},
@@ -24,6 +41,25 @@ window.Maps = ( function(){
     hideMapClass: 'd-none',
     markerInfoWindowBodyFilter: false,
     markerOnClickCallback: false,
+    /**
+     * Callback filter that takes "mapLocation" and "data" as argument and expects to return
+     * the transformed mapLocation object
+     */
+    beforeMapLocationFilter: false,
+    polylineWeight: 8,
+    polylineColor: '#ff8030',
+    drawSupportPolyline: true,
+    supportPolylineWeight: 12,
+    supportPolylineColor: '#ffffff',
+    /**
+     * Callback filter that has "polyline" as argument and expects a transformed
+     * array that can be used to init a polyline in the provider as return value
+     */
+    beforePolylineRenderFilter: false,
+    polylineHasOnLick: false,
+    zoomToPolylineOnClick: false,
+    polylineOnClickCallback: false,
+    afterShowCallback: false,
   };
 
   app.init = function( options ) {
@@ -51,6 +87,9 @@ window.Maps = ( function(){
 
       app.marker = window[settings.markerWindowVariableName];
       if( app.marker.length > 0 ) {
+
+        app.mapLocations = getMapLocations(app.marker);
+
         active = true;
         settings.provider.init( settings.providerConfiguration );
         if( settings.lazyLoadMap === false ) {
@@ -70,9 +109,16 @@ window.Maps = ( function(){
   };
 
   app.remoteLibrariesHaveLoaded = function(){
+    // @todo make map init function calls DRY
+    // @see showMap()
     settings.provider.initMap( mapContainer[0], settings );
-    settings.provider.setMarker( app.marker, settings );
+    app.mapLocations = settings.provider.setMarker( app.mapLocations, settings );
+    app.mapLocations = settings.provider.setPolylines( app.mapLocations, settings );
+    
     mapVisible = true;
+    if( typeof settings.afterShowCallback === 'function' ) {
+      settings.afterShowCallback()
+    }
   };
 
   app.isMapVisible = function() {
@@ -86,8 +132,15 @@ window.Maps = ( function(){
   app.showMap = function() {
     if( active && !mapVisible ) {
       settings.provider.initMap( mapContainer[0], settings );
-      settings.provider.setMarker( app.marker, settings );
+      app.mapLocations = settings.provider.setMarker( app.mapLocations, settings );
+      app.mapLocations = settings.provider.setPolylines( app.mapLocations, settings );
+
+      console.log(app.mapLocations)
+
       mapVisible = true;
+      if( typeof settings.afterShowCallback === 'function' ) {
+        settings.afterShowCallback()
+      }
     }
   };
 
@@ -114,6 +167,7 @@ window.Maps = ( function(){
       }
     }
   };
+
 
   var $$ = function( selector ) {
     return document.querySelectorAll( selector );
@@ -158,6 +212,19 @@ window.Maps = ( function(){
       }
     });
     return data;
+  };
+
+  var getMapLocations = function( marker ) {
+    var mapLocations = [];
+    var hasBeforeMapLocationFilter = typeof settings.beforeMapLocationFilter === 'function';
+    marker.forEach(function(item){
+      var thisMapLocation = new MapLocation(item);
+      if( hasBeforeMapLocationFilter ) {
+        thisMapLocation = settings.beforeMapLocationFilter( thisMapLocation, item);
+      }
+      mapLocations.push( thisMapLocation );
+    });
+    return mapLocations;
   };
 
   return app;
