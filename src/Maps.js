@@ -64,6 +64,7 @@ window.Maps = ( function(){
     polylineHasOnMouseover: false,
     zoomToPolylineOnClick: false,
     polylineOnClickCallback: false,
+    polylineFitBounds: true,
     afterShowCallback: false,
   };
 
