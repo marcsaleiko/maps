@@ -144,9 +144,6 @@ window.LeafletMapProvider = (function () {
         // @see setMarker()
         if(mapSettings.polylineHasOnLick) {
           mapLocations[i].references.polyline.on('click', function(e){
-            if( mapSettings.zoomToPolylineOnClick ) {
-              map.fitBounds(this.getBounds())
-            }
             if( typeof mapSettings.polylineOnClickCallback === 'function' ) {
               var onPolylineCLickReturn = mapSettings.polylineOnClickCallback( this.markerData );
               if(typeof onPolylineCLickReturn === 'MapLocation') {
@@ -165,6 +162,9 @@ window.LeafletMapProvider = (function () {
                 this.bindPopup(infoWindowBody);
                 this.openPopup();
               }
+            }
+            if( mapSettings.zoomToPolylineOnClick ) {
+              map.fitBounds(this.getBounds())
             }
           })
         }
