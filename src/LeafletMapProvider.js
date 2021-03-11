@@ -114,6 +114,7 @@ window.LeafletMapProvider = (function () {
   app.setPolylines = function( mapLocations, mapSettings ) {
 
     var hasBeforePolylineRenderFilter = typeof mapSettings.beforePolylineRenderFilter === 'function'
+    var polylineBounds = null;
 
     for( var i = 0; i < mapLocations.length; i++ ) {
       if( mapLocations[i].polyline.length > 1 ) {
@@ -143,9 +144,6 @@ window.LeafletMapProvider = (function () {
         // @see setMarker()
         if(mapSettings.polylineHasOnLick) {
           mapLocations[i].references.polyline.on('click', function(e){
-            if( mapSettings.zoomToPolylineOnClick ) {
-              map.fitBounds(this.getBounds())
-            }
             if( typeof mapSettings.polylineOnClickCallback === 'function' ) {
               var onPolylineCLickReturn = mapSettings.polylineOnClickCallback( this.markerData );
               if(typeof onPolylineCLickReturn === 'MapLocation') {
@@ -164,6 +162,9 @@ window.LeafletMapProvider = (function () {
                 this.bindPopup(infoWindowBody);
                 this.openPopup();
               }
+            }
+            if( mapSettings.zoomToPolylineOnClick ) {
+              map.fitBounds(this.getBounds())
             }
           })
         }
@@ -187,7 +188,16 @@ window.LeafletMapProvider = (function () {
         }
 
         // @todo polylines fit bounds
+        if(polylineBounds === null) {
+          polylineBounds = mapLocations[i].references.polyline.getBounds();
+        } else {
+          polylineBounds.extend(mapLocations[i].references.polyline.getBounds());
+        }
       }
+    }
+
+    if( polylineBounds !== null && mapSettings.polylineFitBounds === true ) {
+      map.fitBounds(polylineBounds);
     }
 
     return mapLocations
