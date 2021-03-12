@@ -101,6 +101,9 @@ window.LeafletMapProvider = (function () {
               this.openPopup();
             }
           }
+          if( mapSettings.zoomToPolylineOnClick && typeof this.markerData.references.polyline !== 'undefined') {
+            map.fitBounds(this.markerData.references.polyline.getBounds())
+          }
         });
       }
       mapLocations[i].references.marker = mapMarker[i];
