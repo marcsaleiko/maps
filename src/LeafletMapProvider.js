@@ -82,7 +82,10 @@ window.LeafletMapProvider = (function () {
         mapMarker[i].on('click', function() {
           if( mapSettings.markerHasOnClick ) {
             if( typeof mapSettings.markerOnClickCallback === 'function' ) {
-              mapSettings.markerOnClickCallback( this );
+              var onMarkerClickReturn = mapSettings.markerOnClickCallback( this.markerData );
+              if(typeof onMarkerClickReturn === 'MapLocation') {
+                mapLocations[i] = onMarkerClickReturn
+              }
             }
           }
           if( mapSettings.showInfoWindow ) {
@@ -145,9 +148,9 @@ window.LeafletMapProvider = (function () {
         if(mapSettings.polylineHasOnLick) {
           mapLocations[i].references.polyline.on('click', function(e){
             if( typeof mapSettings.polylineOnClickCallback === 'function' ) {
-              var onPolylineCLickReturn = mapSettings.polylineOnClickCallback( this.markerData );
-              if(typeof onPolylineCLickReturn === 'MapLocation') {
-                mapLocations[i] = onPolylineCLickReturn
+              var onPolylineClickReturn = mapSettings.polylineOnClickCallback( this.markerData );
+              if(typeof onPolylineClickReturn === 'MapLocation') {
+                mapLocations[i] = onPolylineClickReturn
               }
             }
             if( mapSettings.showInfoWindow ) {
