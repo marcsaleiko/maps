@@ -141,8 +141,6 @@ window.Maps = ( function(){
       app.mapLocations = settings.provider.setMarker( app.mapLocations, settings );
       app.mapLocations = settings.provider.setPolylines( app.mapLocations, settings );
 
-      console.log(app.mapLocations)
-
       mapVisible = true;
       if( typeof settings.afterShowCallback === 'function' ) {
         settings.afterShowCallback()
@@ -164,11 +162,11 @@ window.Maps = ( function(){
       {
         if( visibleIds.indexOf( app.marker[i].id ) >= 0 ) {
           // should be visible
-          settings.provider.showMarker(i, app.marker[i].id);
+          settings.provider.showMarker(i, app.marker[i].id, settings);
         }
         else {
           // should be hidden
-          settings.provider.hideMarker(i, app.marker[i].id);
+          settings.provider.hideMarker(i, app.marker[i].id, settings);
         }
       }
     }

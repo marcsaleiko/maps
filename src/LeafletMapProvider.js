@@ -187,7 +187,6 @@ window.LeafletMapProvider = (function () {
           })  
         }
 
-        // @todo polylines fit bounds
         if(polylineBounds === null) {
           polylineBounds = mapLocations[i].references.polyline.getBounds();
         } else {
@@ -203,15 +202,29 @@ window.LeafletMapProvider = (function () {
     return mapLocations
   };
 
-  app.showMarker = function(markerIndex, markerId) {
+  app.showMarker = function(markerIndex, markerId, mapSettings) {
       if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
         mapMarker[markerIndex]._icon.style.display = "block";
+        if( typeof mapMarker[markerIndex].markerData.references.polyline !== 'undefined' ) {
+          // order matters here. first redraw support line 
+          // and then draw the polyline on top of the support
+          if( mapSettings.drawSupportPolyline && typeof mapMarker[markerIndex].markerData.references.supportPolyline !== 'undefined') {
+            map.addLayer(mapMarker[markerIndex].markerData.references.supportPolyline)
+          }
+          map.addLayer(mapMarker[markerIndex].markerData.references.polyline)
+        }
       }
   };
 
-  app.hideMarker = function(markerIndex, markerId) {
+  app.hideMarker = function(markerIndex, markerId, mapSettings) {
     if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
       mapMarker[markerIndex]._icon.style.display = "none";
+      if( typeof mapMarker[markerIndex].markerData.references.polyline !== 'undefined' ) {
+        if( mapSettings.drawSupportPolyline && typeof mapMarker[markerIndex].markerData.references.supportPolyline !== 'undefined') {
+          map.removeLayer(mapMarker[markerIndex].markerData.references.supportPolyline)
+        }
+        map.removeLayer(mapMarker[markerIndex].markerData.references.polyline)
+      }
     }
   };
 
