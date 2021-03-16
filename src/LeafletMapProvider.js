@@ -181,6 +181,9 @@ window.LeafletMapProvider = (function () {
               this.setStyle({
                 color: this.markerData.polylineHoverColor
               })
+              if(this.markerData.references.supportPolyline !== null) {
+                this.markerData.references.supportPolyline.bringToFront()
+              }
               this.bringToFront()
             }
           })
