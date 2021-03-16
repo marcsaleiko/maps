@@ -211,10 +211,10 @@ window.LeafletMapProvider = (function () {
   app.showMarker = function(markerIndex, markerId, mapSettings) {
       if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
         mapMarker[markerIndex]._icon.style.display = "block";
-        if( typeof mapMarker[markerIndex].markerData.references.polyline !== 'undefined' ) {
+        if(mapMarker[markerIndex].markerData.references.polyline !== null ) {
           // order matters here. first redraw support line 
           // and then draw the polyline on top of the support
-          if( mapSettings.drawSupportPolyline && typeof mapMarker[markerIndex].markerData.references.supportPolyline !== 'undefined') {
+          if( mapSettings.drawSupportPolyline && mapMarker[markerIndex].markerData.references.supportPolyline !== null) {
             map.addLayer(mapMarker[markerIndex].markerData.references.supportPolyline)
           }
           map.addLayer(mapMarker[markerIndex].markerData.references.polyline)
@@ -225,8 +225,8 @@ window.LeafletMapProvider = (function () {
   app.hideMarker = function(markerIndex, markerId, mapSettings) {
     if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
       mapMarker[markerIndex]._icon.style.display = "none";
-      if( typeof mapMarker[markerIndex].markerData.references.polyline !== 'undefined' ) {
-        if( mapSettings.drawSupportPolyline && typeof mapMarker[markerIndex].markerData.references.supportPolyline !== 'undefined') {
+      if(mapMarker[markerIndex].markerData.references.polyline !== null) {
+        if( mapSettings.drawSupportPolyline && mapMarker[markerIndex].markerData.references.supportPolyline !== null) {
           map.removeLayer(mapMarker[markerIndex].markerData.references.supportPolyline)
         }
         map.removeLayer(mapMarker[markerIndex].markerData.references.polyline)
