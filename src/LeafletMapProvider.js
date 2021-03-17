@@ -3,7 +3,6 @@ window.LeafletMapProvider = (function () {
   var app = {};
   var map = false;
   var tileLayer = false;
-  var mapMarker = [];
   var hasRemoteLibraryToLoad = false;
   var settings = {
     // accepts "normal" or "wms"
@@ -16,6 +15,7 @@ window.LeafletMapProvider = (function () {
     zoomControl: true,
     scrollWheelZoom: true, 
   };
+  var defaultIcon = false;
 
   app.init = function( options ) {
     if( _init ) {return; }
@@ -44,78 +44,121 @@ window.LeafletMapProvider = (function () {
       console.error('LeafletMapProvider: tileLayerType '+settings.tileLayerType+' does not have an implementation.');
     }
 
-  };
-
-  app.setMarker = function( mapLocations, mapSettings ) {
-
-    var defaultIcon = L.icon({
+    defaultIcon = L.icon({
       iconUrl: mapSettings.markerImagePath,
       iconSize: mapSettings.markerIconSize,
       iconAnchor: mapSettings.markerIconAnchor,
       popupAnchor: settings.markerPopupAnchor,
     });
 
-    var latLngBounds = [];
-    for( var i = 0; i < mapLocations.length; i++ ) {
+  };
 
-      var icon = defaultIcon
-      if( mapLocations[i].iconUrl !== '' ) {
-        icon = L.icon({
-          iconUrl: mapLocations[i].iconUrl,
-          iconSize: mapSettings.markerIconSize,
-          iconAnchor: mapSettings.markerIconAnchor,
-          popupAnchor: settings.markerPopupAnchor,
+  app.setMarker = function( mapLocations, mapSettings ) {
+
+    var bounds = null;
+    
+    for( var i = 0; i < mapLocations.length; i++ ) {
+      var location = mapLocations[i]
+      mapLocations[i].references.marker = setSingleMarker(
+        location.latitude,
+        location.longitude,
+        location.infowindow,
+        location.iconUrl,
+        location,
+        i,
+        mapSettings
+      )
+      bounds = extendMarkerBounds(bounds, mapLocations[i].references.marker)
+
+      if(mapLocations[i].additionalMarkers.length > 0) {
+        mapLocations[i].additionalMarkers.forEach( function(marker){
+          if( typeof marker.latitude !== 'undefined' && typeof marker.longitude !== 'undefined') {
+            var iconUrl = marker.iconUrl || ''
+            var leafletMarker = setSingleMarker(
+              marker.latitude,
+              marker.longitude,
+              mapLocations[i].infowindow,
+              iconUrl,
+              mapLocations[i],
+              i,
+              mapSettings
+            )
+            bounds = extendMarkerBounds(bounds, leafletMarker)
+            mapLocations[i].references.additionalMarkers.push(leafletMarker)
+          }
         })
       }
-
-      mapMarker[i] = L.marker( [mapLocations[i].latitude, mapLocations[i].longitude], {
-          icon: icon,
-      }).addTo(map);
-
-      latLngBounds.push([mapLocations[i].latitude, mapLocations[i].longitude]);
-      mapMarker[i].markerData = mapLocations[i];
-
-      if( mapSettings.showInfoWindow && typeof mapLocations[i].infowindow !== 'undefined' && mapLocations[i].infowindow !== '' ) {
-        mapMarker[i].bindPopup(mapLocations[i].infowindow);
-      }
-      if( mapSettings.markerHasOnClick || mapSettings.showInfoWindow ) {
-        mapMarker[i].on('click', function() {
-          if( mapSettings.markerHasOnClick ) {
-            if( typeof mapSettings.markerOnClickCallback === 'function' ) {
-              var onMarkerClickReturn = mapSettings.markerOnClickCallback( this.markerData );
-              if(typeof onMarkerClickReturn === 'MapLocation') {
-                mapLocations[i] = onMarkerClickReturn
-              }
-            }
-          }
-          if( mapSettings.showInfoWindow ) {
-            var infoWindowBody = '';
-            if( typeof this.markerData.infowindow !== 'undefined' && this.markerData.infowindow !== '' ) {
-              infoWindowBody = this.markerData.infowindow;
-            }
-            if( typeof mapSettings.markerInfoWindowBodyFilter === 'function' ) {
-              infoWindowBody = mapSettings.markerInfoWindowBodyFilter( this, infoWindowBody );
-            }
-            if( infoWindowBody !== '' ) {
-              this.bindPopup(infoWindowBody);
-              this.openPopup();
-            }
-          }
-          if( mapSettings.zoomToPolylineOnClick && typeof this.markerData.references.polyline !== 'undefined') {
-            map.fitBounds(this.markerData.references.polyline.getBounds())
-          }
-        });
-      }
-      mapLocations[i].references.marker = mapMarker[i];
+      
     }
     if( mapSettings.mapUseFirstMarkerAsCenter === true ) {
       map.panTo(new L.LatLng(mapLocations[0].latitude, mapLocations[0].longitude), mapSettings.mapDefaultZoom);
     }
     if( mapSettings.markerFitBounds === true ) {
-      map.fitBounds(L.latLngBounds(latLngBounds));
+      map.fitBounds(bounds);
     }
     return mapLocations;
   };
+
+  var setSingleMarker = function( latitude, longitude, infowindow, iconUrl, mapLocation, mapLocationIndex, mapSettings ) {
+    var icon = defaultIcon
+    if( iconUrl !== '' ) {
+      icon = L.icon({
+        iconUrl: iconUrl,
+        iconSize: mapSettings.markerIconSize,
+        iconAnchor: mapSettings.markerIconAnchor,
+        popupAnchor: settings.markerPopupAnchor,
+      })
+    }
+
+    var marker = L.marker( [latitude, longitude], {
+        icon: icon,
+    }).addTo(map);
+
+    marker.markerData = mapLocation;
+
+    if( mapSettings.showInfoWindow && infowindow !== '' ) {
+      marker.bindPopup(infowindow);
+    }
+    if( mapSettings.markerHasOnClick || mapSettings.showInfoWindow ) {
+      marker.on('click', function() {
+        if( mapSettings.markerHasOnClick ) {
+          if( typeof mapSettings.markerOnClickCallback === 'function' ) {
+            var onMarkerClickReturn = mapSettings.markerOnClickCallback( this.markerData );
+            if(typeof onMarkerClickReturn === 'MapLocation') {
+              mapLocations[mapLocationIndex] = onMarkerClickReturn
+            }
+          }
+        }
+        if( mapSettings.showInfoWindow ) {
+          var infoWindowBody = '';
+          if( typeof this.markerData.infowindow !== 'undefined' && this.markerData.infowindow !== '' ) {
+            infoWindowBody = this.markerData.infowindow;
+          }
+          if( typeof mapSettings.markerInfoWindowBodyFilter === 'function' ) {
+            infoWindowBody = mapSettings.markerInfoWindowBodyFilter( this, infoWindowBody );
+          }
+          if( infoWindowBody !== '' ) {
+            this.bindPopup(infoWindowBody);
+            this.openPopup();
+          }
+        }
+        if( mapSettings.zoomToPolylineOnClick && typeof this.markerData.references.polyline !== 'undefined') {
+          map.fitBounds(this.markerData.references.polyline.getBounds())
+        }
+      });
+    }
+
+    return marker
+  }
+
+  var extendMarkerBounds = function(bounds, marker) {
+    if(bounds === null) {
+      bounds = L.latLngBounds(marker.getLatLng(), marker.getLatLng());
+    } else {
+      bounds.extend(marker.getLatLng());
+    }
+    return bounds
+  }
 
   app.setPolylines = function( mapLocations, mapSettings ) {
 
@@ -212,28 +255,28 @@ window.LeafletMapProvider = (function () {
     return mapLocations
   };
 
-  app.showMarker = function(markerIndex, markerId, mapSettings) {
-      if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
-        mapMarker[markerIndex]._icon.style.display = "block";
-        if(mapMarker[markerIndex].markerData.references.polyline !== null ) {
+  app.showMarker = function(mapLocation, markerIndex, markerId, mapSettings) {
+      if( mapLocation && mapLocation.id === markerId ) {
+        mapLocation.references.marker._icon.style.display = "block";
+        if(mapLocation.references.polyline !== null ) {
           // order matters here. first redraw support line 
           // and then draw the polyline on top of the support
-          if( mapSettings.drawSupportPolyline && mapMarker[markerIndex].markerData.references.supportPolyline !== null) {
-            map.addLayer(mapMarker[markerIndex].markerData.references.supportPolyline)
+          if( mapSettings.drawSupportPolyline && mapLocation.references.supportPolyline !== null) {
+            map.addLayer(mapLocation.references.supportPolyline)
           }
-          map.addLayer(mapMarker[markerIndex].markerData.references.polyline)
+          map.addLayer(mapLocation.references.polyline)
         }
       }
   };
 
-  app.hideMarker = function(markerIndex, markerId, mapSettings) {
-    if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
-      mapMarker[markerIndex]._icon.style.display = "none";
-      if(mapMarker[markerIndex].markerData.references.polyline !== null) {
-        if( mapSettings.drawSupportPolyline && mapMarker[markerIndex].markerData.references.supportPolyline !== null) {
-          map.removeLayer(mapMarker[markerIndex].markerData.references.supportPolyline)
+  app.hideMarker = function(mapLocation, markerIndex, markerId, mapSettings) {
+    if( mapLocation && mapLocation.id === markerId ) {
+      mapLocation.references.marker._icon.style.display = "none";
+      if(mapLocation.references.polyline !== null) {
+        if( mapSettings.drawSupportPolyline && mapLocation.references.supportPolyline !== null) {
+          map.removeLayer(mapLocation.references.supportPolyline)
         }
-        map.removeLayer(mapMarker[markerIndex].markerData.references.polyline)
+        map.removeLayer(mapLocation.references.polyline)
       }
     }
   };
