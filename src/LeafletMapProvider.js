@@ -70,6 +70,23 @@ window.LeafletMapProvider = (function () {
       )
       bounds = extendMarkerBounds(bounds, mapLocations[i].references.marker)
 
+      if(mapLocations[i].additionalMarkers.length > 0) {
+        mapLocations[i].additionalMarkers.forEach( function(marker){
+          if( typeof marker.latitude !== 'undefined' && typeof marker.longitude !== 'undefined') {
+            var iconUrl = marker.iconUrl || ''
+            var leafletMarker = setSingleMarker(
+              marker.latitude,
+              marker.longitude,
+              mapLocations[i].infowindow,
+              iconUrl,
+              mapLocations[i],
+              i,
+              mapSettings
+            )
+            bounds = extendMarkerBounds(bounds, leafletMarker)
+            mapLocations[i].references.additionalMarkers.push(leafletMarker)
+          }
+        })
       }
       
     }
