@@ -3,13 +3,13 @@ function MapLocation(arg) {
   this.latitude = arg.latitude || 0.0;
   this.longitude = arg.longitude || 0.0;
   this.iconUrl = arg.iconUrl || '';
-  this.infowindow = arg.infowindow || 0.0;
+  this.infowindow = arg.infowindow || '';
   this.polyline = arg.polyline || [];
   this.polylineColor = arg.polylineColor || '';
   this.polylineHoverColor = arg.polylineHoverColor || '';
   this.supportPolylineColor = arg.supportPolylineColor || '';
   // Array w/ latitude, longitude and iconUrl
-  this.additionalMarkers = [];
+  this.additionalMarkers = arg.additionalMarkers || [];
   this.references = {
     marker: null,
     additionalMarkers: [],
