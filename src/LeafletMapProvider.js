@@ -3,7 +3,6 @@ window.LeafletMapProvider = (function () {
   var app = {};
   var map = false;
   var tileLayer = false;
-  var mapMarker = [];
   var hasRemoteLibraryToLoad = false;
   var settings = {
     // accepts "normal" or "wms"

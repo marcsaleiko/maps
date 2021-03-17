@@ -161,15 +161,16 @@ window.Maps = ( function(){
     if( active && mapVisible ) {
       // check whether a marker id is in the set of
       // visibleUIds and set them to visible
-      for( var i = 0; i < app.marker.length; i++ )
+      // @todo change marker to mapLocation
+      for( var i = 0; i < app.mapLocations.length; i++ )
       {
-        if( visibleIds.indexOf( app.marker[i].id ) >= 0 ) {
+        if( visibleIds.indexOf( app.mapLocations[i].id ) >= 0 ) {
           // should be visible
-          settings.provider.showMarker(app.mapLocations[i], i, app.marker[i].id, settings);
+          settings.provider.showMarker(app.mapLocations[i], i, app.mapLocations[i].id, settings);
         }
         else {
           // should be hidden
-          settings.provider.hideMarker(app.mapLocations[i], i, app.marker[i].id, settings);
+          settings.provider.hideMarker(app.mapLocations[i], i, app.mapLocations[i].id, settings);
         }
       }
     }
