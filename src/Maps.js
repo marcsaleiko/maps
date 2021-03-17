@@ -8,8 +8,11 @@ function MapLocation(arg) {
   this.polylineColor = arg.polylineColor || '';
   this.polylineHoverColor = arg.polylineHoverColor || '';
   this.supportPolylineColor = arg.supportPolylineColor || '';
+  // Array w/ latitude, longitude and iconUrl
+  this.additionalMarkers = [];
   this.references = {
     marker: null,
+    additionalMarkers: [],
     polyline: null,
     supportPolyline: null
   };
@@ -156,17 +159,17 @@ window.Maps = ( function(){
   app.updateMarkerVisibility = function( visibleIds )
   {
     if( active && mapVisible ) {
-      // check whether a marker id (.content) is in the set of
+      // check whether a marker id is in the set of
       // visibleUIds and set them to visible
       for( var i = 0; i < app.marker.length; i++ )
       {
         if( visibleIds.indexOf( app.marker[i].id ) >= 0 ) {
           // should be visible
-          settings.provider.showMarker(i, app.marker[i].id, settings);
+          settings.provider.showMarker(app.mapLocations[i], i, app.marker[i].id, settings);
         }
         else {
           // should be hidden
-          settings.provider.hideMarker(i, app.marker[i].id, settings);
+          settings.provider.hideMarker(app.mapLocations[i], i, app.marker[i].id, settings);
         }
       }
     }

@@ -68,18 +68,18 @@ window.LeafletMapProvider = (function () {
         })
       }
 
-      mapMarker[i] = L.marker( [mapLocations[i].latitude, mapLocations[i].longitude], {
+      mapLocations[i].references.marker = L.marker( [mapLocations[i].latitude, mapLocations[i].longitude], {
           icon: icon,
       }).addTo(map);
 
       latLngBounds.push([mapLocations[i].latitude, mapLocations[i].longitude]);
-      mapMarker[i].markerData = mapLocations[i];
+      mapLocations[i].references.marker.markerData = mapLocations[i];
 
       if( mapSettings.showInfoWindow && typeof mapLocations[i].infowindow !== 'undefined' && mapLocations[i].infowindow !== '' ) {
-        mapMarker[i].bindPopup(mapLocations[i].infowindow);
+        mapLocations[i].references.marker.bindPopup(mapLocations[i].infowindow);
       }
       if( mapSettings.markerHasOnClick || mapSettings.showInfoWindow ) {
-        mapMarker[i].on('click', function() {
+        mapLocations[i].references.marker.on('click', function() {
           if( mapSettings.markerHasOnClick ) {
             if( typeof mapSettings.markerOnClickCallback === 'function' ) {
               var onMarkerClickReturn = mapSettings.markerOnClickCallback( this.markerData );
@@ -106,7 +106,7 @@ window.LeafletMapProvider = (function () {
           }
         });
       }
-      mapLocations[i].references.marker = mapMarker[i];
+      
     }
     if( mapSettings.mapUseFirstMarkerAsCenter === true ) {
       map.panTo(new L.LatLng(mapLocations[0].latitude, mapLocations[0].longitude), mapSettings.mapDefaultZoom);
@@ -212,28 +212,28 @@ window.LeafletMapProvider = (function () {
     return mapLocations
   };
 
-  app.showMarker = function(markerIndex, markerId, mapSettings) {
-      if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
-        mapMarker[markerIndex]._icon.style.display = "block";
-        if(mapMarker[markerIndex].markerData.references.polyline !== null ) {
+  app.showMarker = function(mapLocation, markerIndex, markerId, mapSettings) {
+      if( mapLocation && mapLocation.id === markerId ) {
+        mapLocation.references.marker._icon.style.display = "block";
+        if(mapLocation.references.polyline !== null ) {
           // order matters here. first redraw support line 
           // and then draw the polyline on top of the support
-          if( mapSettings.drawSupportPolyline && mapMarker[markerIndex].markerData.references.supportPolyline !== null) {
-            map.addLayer(mapMarker[markerIndex].markerData.references.supportPolyline)
+          if( mapSettings.drawSupportPolyline && mapLocation.references.supportPolyline !== null) {
+            map.addLayer(mapLocation.references.supportPolyline)
           }
-          map.addLayer(mapMarker[markerIndex].markerData.references.polyline)
+          map.addLayer(mapLocation.references.polyline)
         }
       }
   };
 
-  app.hideMarker = function(markerIndex, markerId, mapSettings) {
-    if( mapMarker[markerIndex] && mapMarker[markerIndex].markerData.id === markerId ) {
-      mapMarker[markerIndex]._icon.style.display = "none";
-      if(mapMarker[markerIndex].markerData.references.polyline !== null) {
-        if( mapSettings.drawSupportPolyline && mapMarker[markerIndex].markerData.references.supportPolyline !== null) {
-          map.removeLayer(mapMarker[markerIndex].markerData.references.supportPolyline)
+  app.hideMarker = function(mapLocation, markerIndex, markerId, mapSettings) {
+    if( mapLocation && mapLocation.id === markerId ) {
+      mapLocation.references.marker._icon.style.display = "none";
+      if(mapLocation.references.polyline !== null) {
+        if( mapSettings.drawSupportPolyline && mapLocation.references.supportPolyline !== null) {
+          map.removeLayer(mapLocation.references.supportPolyline)
         }
-        map.removeLayer(mapMarker[markerIndex].markerData.references.polyline)
+        map.removeLayer(mapLocation.references.polyline)
       }
     }
   };
