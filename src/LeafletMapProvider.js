@@ -191,7 +191,7 @@ window.LeafletMapProvider = (function () {
 
         // @todo make onclick DRY
         // @see setMarker()
-        if(mapSettings.polylineHasOnLick) {
+        if(mapSettings.polylineHasOnClick) {
           mapLocations[i].references.polyline.on('click', function(e){
             if( typeof mapSettings.polylineOnClickCallback === 'function' ) {
               var onPolylineClickReturn = mapSettings.polylineOnClickCallback( this.markerData );

@@ -63,7 +63,7 @@ window.Maps = ( function(){
      * array that can be used to init a polyline in the provider as return value
      */
     beforePolylineRenderFilter: false,
-    polylineHasOnLick: false,
+    polylineHasOnClick: false,
     polylineHasOnMouseover: false,
     zoomToPolylineOnClick: false,
     polylineOnClickCallback: false,
