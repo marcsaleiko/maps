@@ -14,6 +14,13 @@ window.LeafletMapProvider = (function () {
     markerPopupAnchor: [0, -40],
     zoomControl: true,
     scrollWheelZoom: true, 
+    /**
+     * Callback that runs after the map was initialized. You may add your own
+     * layer etc. here or modify the map somehow.
+     * You will get the "map" object and the "mapSettings" from the Maps instance.
+     * Please make sure you return the "map" object!
+     */
+    afterInitCallback: false,
   };
   var defaultIcon = false;
 
@@ -50,6 +57,10 @@ window.LeafletMapProvider = (function () {
       iconAnchor: mapSettings.markerIconAnchor,
       popupAnchor: settings.markerPopupAnchor,
     });
+
+    if( typeof settings.afterInitCallback === 'function' ) {
+      map = settings.afterInitCallback( map, mapSettings )
+    }
 
   };
 

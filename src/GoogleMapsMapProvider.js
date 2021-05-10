@@ -13,6 +13,13 @@ window.GoogleMapsMapProvider = (function () {
     streetViewControl: false,
     fullscreenControl: false,
     disableDefaultUI: false,
+    /**
+     * Callback that runs after the map was initialized. You may add your own
+     * layer etc. here or modify the map somehow.
+     * You will get the "map" object and the "mapSettings" from the Maps instance.
+     * Please make sure you return the "map" object!
+     */
+    afterInitCallback: false,
   };
 
   app.init = function( options ) {
@@ -46,6 +53,10 @@ window.GoogleMapsMapProvider = (function () {
 
     map = new google.maps.Map( mapElement, mapSettings );
     // @todo add map styles
+
+    if (typeof settings.afterInitCallback === 'function') {
+      map = settings.afterInitCallback(map, mapSettings)
+    }
 
   };
 
