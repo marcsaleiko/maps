@@ -39,6 +39,7 @@ window.LeafletMapProvider = (function () {
       zoomControl: settings.zoomControl,
       scrollWheelZoom: settings.scrollWheelZoom,
       dragging: !L.Browser.mobile,
+      tileLayerOptions: settings.tileLayerOptions,
     }).setView(mapSettings.mapDefaultCenter, mapSettings.mapDefaultZoom);
 
     if( settings.tileLayerType === 'normal' ) {
